@@ -23,16 +23,20 @@ question_one_button.grid(column = 0, row = 1)
 question_two_button = ttk.Button(frame, text = "Question 2", command = lambda : questionStart(question_two_button, True))
 question_two_button.grid(column = 1,row = 1)
 
-def questionStart(button, is_image_question):
+def questionStart(button, image_button):
 
     global question_answered; question_answered = False
 
-    # had to define the global before using a ternary to assign the value
     global timer_length
-    timer_length = 120 if is_image_question else 60
-
-    # no visible difference, but ensures question changes before timer starts
-    button.configure(text = question_dict[button["text"]][0], command = lambda : questionAnswered(button))
+   
+    if image_button:
+        timer_length = 120
+        button.configure(image = _, command = lambda : questionAnswered(button)) # TODO: implement image button logic
+    else:
+        timer_length = 60
+        button.configure(text = question_dict[button["text"]][0], command = lambda : questionAnswered(button))
+    
+    # placing this at the end to ensure the start_time doesnt initialize until after the buttons have reconfigured
     global start_time; start_time = time.time()
 
     incrementTimer() 
