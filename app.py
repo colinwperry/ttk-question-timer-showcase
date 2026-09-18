@@ -10,34 +10,42 @@ frame.grid()
 timer_label = ttk.Label(frame, text="0:00")
 timer_label.grid(column=0, row=0)
 
-question_container = {
-        1: ["What is a variable?", "A way to save and use information."],
-        2: ["print(\"Hello World!\")", "prints Hello World!"]
+# each question has a UID, the first digit is the question number, and the second digit tells the program
+# if the question is a code or logic comprehension question
+question_dict = {
+        "Question 1": ["What is a variable?", "A way to save and use information."],
+        "Question 2": ["print(\"Hello World!\")", "prints Hello World!"]
         }
 
-logic_question_button = ttk.Button(frame, text="Logic Question", command=lambda: questionStart(1))
-logic_question_button.grid(column=0, row=1)
+question_one_button = ttk.Button(frame, text="Question 1", command=lambda: questionStart(question_one_button, False))
+question_one_button.grid(column=0, row=1)
 
-code_question_button = ttk.Button(frame, text="Code Question", command=lambda: questionStart(2))
-code_question_button.grid(column=1,row=1)
+question_two_button = ttk.Button(frame, text="Question 2", command=lambda: questionStart(question_two_button, True))
+question_two_button.grid(column=1,row=1)
 
-def questionStart(question_id):
-    print(question_container[question_id][0])
-
-def timerStart():
+def questionStart(button, is_image_question):
+    global question_answered; question_answered = False
+    global timer_length
+    timer_length = 120 if is_image_question else 60
+    button.configure(text=question_dict[button["text"]][0], command=lambda: questionAnswered(button))
+    # no visible difference, but ensures question changes before timer starts
     global start_time; start_time = time.time()
-    global timer_length; timer_length = 120
-    timer_button.configure(text="Stop Timer", command=timerStop)
-    incrementTimer()
+    incrementTimer()    
 
-def timerStop():
-    global timer_length; timer_length = 0
-    timer_button.configure(text="Start Timer", command=timerStart)
+def questionAnswered(button):
+    global question_answered; question_answered = True
+    for key in question_dict:
+        if button["text"] in question_dict[key]:
+            button.configure(text=question_dict[key][1])
 
 def incrementTimer():
-    if timer_length > 0:
-        root.after(1000, incrementTimer)
+    global question_answered
+    if timer_length > 0 and not question_answered:
         proper_time = int(start_time - time.time() + timer_length)
+        if proper_time <= 0:
+            timer_label.configure(text="Times Up!")
+            return
+        root.after(1000, incrementTimer)
         minute, second = proper_time // 60, proper_time % 60
         timer_label.configure(text=f"{minute}:{second:02}") 
 
